@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'DM Sans', sans-serif;
+  --font-serif-display: 'DM Serif Display', serif;
+
+  --color-brand-blue: #1A56DB;
+  --color-brand-blue-light: #EBF5FF;
+  --color-brand-blue-mid: #3F83F8;
+  --color-brand-blue-border: #C3DDFD;
+
+  --color-text-primary: #111928;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-border: #E5E7EB;
+  --color-bg: #F9FAFB;
+}
+
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
