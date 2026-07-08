@@ -1,30 +1,77 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { User, Lock } from 'lucide-react'
-import Navbar from '../components/layout/Navbar'
-import AuthCard from '../components/auth/AuthCard'
-import { useAuth } from '../context/AuthContext'
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Mail, Lock } from "lucide-react"
+
+import Navbar from "../components/layout/Navbar"
+import AuthCard from "../components/auth/AuthCard"
+import { useAuth } from "../context/AuthContext"
+import api from "../services/api"
 
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: ganti dengan POST /auth/login pas BE udah jalan
-    console.log('login attempt', { username, password })
+
+    setErrorMsg("")
+    setLoading(true)
+
+    try {
+      const formData = new URLSearchParams()
+
+      // OAuth2PasswordRequestForm selalu menggunakan field "username"
+      formData.append("username", email)
+      formData.append("password", password)
+
+      const response = await api.post(
+        "/auth/login",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      )
+
+      const token = response.data.access_token
+
+      // simpan token sementara
+      localStorage.setItem("token", token)
+
+      // ambil data user yang sedang login
+      const me = await api.get("/users/me")
+
+      // simpan ke AuthContext
+      login(token, me.data)
+
+      navigate("/")
+    } catch (error) {
+      console.error(error)
+
+      if (error.response) {
+        setErrorMsg(error.response.data.detail)
+      } else {
+        setErrorMsg("Tidak dapat terhubung ke server.")
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSkipLogin = () => {
-    login('dummy-token-for-dev', {
-      id_user: 0,
-      username: 'testuser',
-      nama_lengkap: 'Pengguna Uji',
+    login("dummy-token", {
+      id: 0,
+      username: "developer",
+      email: "developer@example.com",
     })
-    navigate('/')
+
+    navigate("/")
   }
 
   return (
@@ -33,35 +80,52 @@ export default function Login() {
 
       <AuthCard
         title="Masuk ke akun"
-        subtitle="Sistem deteksi emosi teks tweet bahasa Indonesia"
+        subtitle="Sistem Deteksi Emosi Teks Tweet Bahasa Indonesia"
         footerText="Belum punya akun?"
         footerLinkText="Daftar sekarang"
         footerTo="/register"
       >
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="username" className="mb-1.5 block text-[13px] font-medium text-text-primary">
-              Username
+            <label
+              htmlFor="email"
+              className="mb-1.5 block text-[13px] font-medium text-text-primary"
+            >
+              Email
             </label>
+
             <div className="relative">
-              <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <Mail
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
+
               <input
-                id="username"
-                type="text"
-                placeholder="Masukkan username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="Masukkan email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="h-10.5 w-full rounded-[10px] border border-border pl-9.5 pr-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue"
+                required
               />
             </div>
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="mb-1.5 block text-[13px] font-medium text-text-primary">
+            <label
+              htmlFor="password"
+              className="mb-1.5 block text-[13px] font-medium text-text-primary"
+            >
               Password
             </label>
+
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <Lock
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
+
               <input
                 id="password"
                 type="password"
@@ -69,15 +133,23 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-10.5 w-full rounded-[10px] border border-border pl-9.5 pr-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue"
+                required
               />
             </div>
           </div>
 
+          {errorMsg && (
+            <div className="mb-4 rounded-[10px] border border-[#F8B4B4] bg-[#FDF2F2] px-3.5 py-2.5 text-[13px] text-[#9B1C1C]">
+              {errorMsg}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="mt-2 h-11 w-full rounded-[10px] bg-brand-blue text-sm font-medium text-white transition-colors hover:bg-[#1648c8]"
+            disabled={loading}
+            className="mt-2 h-11 w-full rounded-[10px] bg-brand-blue text-sm font-medium text-white transition-colors hover:bg-[#1648c8] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Masuk
+            {loading ? "Masuk..." : "Masuk"}
           </button>
 
           {import.meta.env.DEV && (

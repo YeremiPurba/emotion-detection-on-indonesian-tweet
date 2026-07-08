@@ -1,38 +1,58 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { User, Lock, UserCircle } from 'lucide-react'
-import Navbar from '../components/layout/Navbar'
-import AuthCard from '../components/auth/AuthCard'
-import { useAuth } from '../context/AuthContext'
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { User, Lock, Mail } from "lucide-react"
+
+import Navbar from "../components/layout/Navbar"
+import AuthCard from "../components/auth/AuthCard"
+import api from "../services/api"
 
 export default function Register() {
-  const { login } = useAuth()
   const navigate = useNavigate()
 
-  const [nama, setNama] = useState('')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [konfirmasi, setKonfirmasi] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [konfirmasi, setKonfirmasi] = useState("")
+  const [errorMsg, setErrorMsg] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setErrorMsg('')
+    setErrorMsg("")
 
-    if (!nama.trim() || !username.trim() || !password || !konfirmasi) {
-      setErrorMsg('Semua field wajib diisi.')
+    if (!username.trim() || !email.trim() || !password || !konfirmasi) {
+      setErrorMsg("Semua field wajib diisi.")
       return
     }
+
     if (password !== konfirmasi) {
-      setErrorMsg('Konfirmasi password tidak sama dengan password.')
+      setErrorMsg("Konfirmasi password tidak sama.")
       return
     }
 
-    // TODO: ganti dengan axios.post('/auth/register', { nama_lengkap: nama, username, password })
-    // lalu, kalau BE langsung balikin token setelah register:
-    // login(response.token, response.user)
-    console.log('register attempt', { nama, username, password })
-    navigate('/login')
+    setLoading(true)
+
+    try {
+      await api.post("/users/register", {
+        username,
+        email,
+        password,
+      })
+
+      alert("Registrasi berhasil. Silakan login.")
+
+      navigate("/login")
+    } catch (error) {
+      console.error(error)
+
+      if (error.response) {
+        setErrorMsg(error.response.data.detail)
+      } else {
+        setErrorMsg("Tidak dapat terhubung ke server.")
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -41,39 +61,31 @@ export default function Register() {
 
       <AuthCard
         title="Buat akun baru"
-        subtitle="Isi data diri kamu untuk mendaftar"
+        subtitle="Daftarkan akun untuk menggunakan sistem deteksi emosi"
         footerText="Sudah punya akun?"
         footerLinkText="Masuk di sini"
         footerTo="/login"
       >
         <form onSubmit={handleSubmit}>
-          <div className="mb-3.5">
-            <label htmlFor="nama" className="mb-1.5 block text-[13px] font-medium text-text-primary">
-              Nama lengkap
-            </label>
-            <div className="relative">
-              <UserCircle size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-              <input
-                id="nama"
-                type="text"
-                placeholder="Masukkan nama lengkap"
-                value={nama}
-                onChange={(e) => setNama(e.target.value)}
-                className="h-10.5 w-full rounded-[10px] border border-border pl-9.5 pr-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue"
-              />
-            </div>
-          </div>
 
           <div className="mb-3.5">
-            <label htmlFor="username" className="mb-1.5 block text-[13px] font-medium text-text-primary">
+            <label
+              htmlFor="username"
+              className="mb-1.5 block text-[13px] font-medium text-text-primary"
+            >
               Username
             </label>
+
             <div className="relative">
-              <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <User
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
+
               <input
                 id="username"
                 type="text"
-                placeholder="Buat username"
+                placeholder="Masukkan username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="h-10.5 w-full rounded-[10px] border border-border pl-9.5 pr-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue"
@@ -82,15 +94,48 @@ export default function Register() {
           </div>
 
           <div className="mb-3.5">
-            <label htmlFor="password" className="mb-1.5 block text-[13px] font-medium text-text-primary">
+            <label
+              htmlFor="email"
+              className="mb-1.5 block text-[13px] font-medium text-text-primary"
+            >
+              Email
+            </label>
+
+            <div className="relative">
+              <Mail
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
+
+              <input
+                id="email"
+                type="email"
+                placeholder="Masukkan email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-10.5 w-full rounded-[10px] border border-border pl-9.5 pr-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue"
+              />
+            </div>
+          </div>
+
+          <div className="mb-3.5">
+            <label
+              htmlFor="password"
+              className="mb-1.5 block text-[13px] font-medium text-text-primary"
+            >
               Password
             </label>
+
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <Lock
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
+
               <input
                 id="password"
                 type="password"
-                placeholder="Buat password"
+                placeholder="Masukkan password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-10.5 w-full rounded-[10px] border border-border pl-9.5 pr-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue"
@@ -99,11 +144,19 @@ export default function Register() {
           </div>
 
           <div className="mb-3.5">
-            <label htmlFor="konfirmasi" className="mb-1.5 block text-[13px] font-medium text-text-primary">
-              Konfirmasi password
+            <label
+              htmlFor="konfirmasi"
+              className="mb-1.5 block text-[13px] font-medium text-text-primary"
+            >
+              Konfirmasi Password
             </label>
+
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <Lock
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
+
               <input
                 id="konfirmasi"
                 type="password"
@@ -123,10 +176,12 @@ export default function Register() {
 
           <button
             type="submit"
-            className="mt-2 h-11 w-full rounded-[10px] bg-brand-blue text-sm font-medium text-white transition-colors hover:bg-[#1648c8]"
+            disabled={loading}
+            className="mt-2 h-11 w-full rounded-[10px] bg-brand-blue text-sm font-medium text-white transition-colors hover:bg-[#1648c8] disabled:opacity-50"
           >
-            Daftar
+            {loading ? "Mendaftarkan..." : "Daftar"}
           </button>
+
         </form>
       </AuthCard>
     </div>
