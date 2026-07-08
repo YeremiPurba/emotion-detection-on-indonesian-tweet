@@ -1,0 +1,5 @@
+DATABASE_HOST = "localhost"
+DATABASE_PORT = 3306
+DATABASE_USER = "root"
+DATABASE_PASSWORD = "Backend123!"
+DATABASE_NAME = "emotion_detection"
