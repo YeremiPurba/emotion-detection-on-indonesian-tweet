@@ -10,3 +10,11 @@ Jumlah emosi yang dideteksi ada sebanyak lima kelas, yakni marah, takut, senang,
 ## Dataset
 - **Indonesian Twitter Emotion Dataset**
 - Sumber: https://www.kaggle.com/datasets/wahyuikbalmaulana/indonesian-twitter-emotion-dataset/data
+
+---
+
+## Setup
+### Clone the repository
+```bash
+git clone https://github.com/YeremiPurba/emotion-detection-on-indonesian-tweet.git
+```
