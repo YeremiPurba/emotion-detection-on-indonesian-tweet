@@ -14,7 +14,11 @@ Jumlah emosi yang dideteksi ada sebanyak lima kelas, yakni marah, takut, senang,
 ---
 
 ## Setup
-### Clone the repository
+### 1. Clone the repository
 ```bash
 git clone https://github.com/YeremiPurba/emotion-detection-on-indonesian-tweet.git
 ```
+
+### 2. Import Database
+Unduh file `emotion_detection.sql` yang terdapat di `emotionDetection/database/`  <br>
+Import file ke dalam aplikasi DBMS anda.
